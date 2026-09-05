@@ -1,0 +1,27 @@
+[project]
+name = "wc3-gym-discord-bot"
+version = "0.1.0"
+description = "Discord interactions adapter: checks Discord's signature, acknowledges, forwards to the Warcraft Gym backend"
+requires-python = ">=3.13"
+dependencies = [
+    "cryptography",
+    "starlette",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2",
+    "pytest",
+    "ruff",
+    "uvicorn",
+]
+
+[tool.pytest]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
