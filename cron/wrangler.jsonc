@@ -1,0 +1,9 @@
+{
+  "name": "wc3-gym-cast-reminders",
+  "main": "index.js",
+  "compatibility_date": "2026-09-09",
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
+  // CRON_SECRET is a secret: npx wrangler secret put CRON_SECRET
+  "observability": { "enabled": true }
+}
