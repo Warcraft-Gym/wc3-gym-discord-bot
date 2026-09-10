@@ -1,0 +1,25 @@
+name: Deploy cast reminders
+
+on:
+  push:
+    branches: [main]
+    paths: ['cron/**', '.github/workflows/deploy-cron.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: github.repository == 'Warcraft-Gym/wc3-gym-discord-bot'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: extractions/setup-just@v4
+      - run: just cron test
+      - run: just cron deploy staging
+      - run: just cron deploy prod
