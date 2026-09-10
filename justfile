@@ -1,5 +1,8 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+# The cast-reminder Worker on Cloudflare: `just cron deploy staging`.
+mod cron
+
 default:
     @just --list
 

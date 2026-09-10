@@ -4,6 +4,13 @@
   "compatibility_date": "2026-09-09",
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
-  // CRON_SECRET is a secret: npx wrangler secret put CRON_SECRET
-  "observability": { "enabled": true }
+  // CRON_SECRET is a secret: `just cron deploy` sets it from the environment
+  "observability": { "enabled": true },
+  "env": {
+    // Deploys as wc3-gym-cast-reminders-staging
+    "staging": {
+      "triggers": { "crons": ["*/5 * * * *"] },
+      "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-git-staging-wc-3-gym.vercel.app" }
+    }
+  }
 }

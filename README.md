@@ -24,3 +24,12 @@ just test
 just dev      # needs .env with the two values
 just deploy staging
 ```
+
+## Cast reminders
+
+`cron/` is a Cloudflare Worker that calls the backend's `GET /jobs/cast-reminders` every five minutes, one Worker for prod and one for staging. The workflow `deploy-cron.yml` runs `just cron test` and `just cron deploy` for both on every merge that touches `cron/`. It needs the repository secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `CRON_SECRET`, the same value as the backend's.
+
+```
+cd cron && npx wrangler@3.114.17 tail                  # watch prod runs
+cd cron && npx wrangler@3.114.17 tail --env staging    # watch staging runs
+```
