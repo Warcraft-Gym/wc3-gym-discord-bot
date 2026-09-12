@@ -7,9 +7,11 @@
   // CRON_SECRET is a secret: `just cron deploy` sets it from the environment
   "observability": { "enabled": true },
   "env": {
-    // Deploys as wc3-gym-cast-reminders-staging
+    // Deploys as wc3-gym-cast-reminders-staging. No cron: `triggers` is an
+    // inheritable key, so the empty list is what stops the prod schedule from
+    // applying here. Run it on demand with `wrangler dev --test-scheduled`.
     "staging": {
-      "triggers": { "crons": ["*/5 * * * *"] },
+      "triggers": { "crons": [] },
       "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-git-staging-wc-3-gym.vercel.app" }
     }
   }
