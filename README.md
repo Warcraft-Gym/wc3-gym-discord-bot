@@ -27,7 +27,7 @@ just deploy staging
 
 ## Cast reminders
 
-`cron/` is a Cloudflare Worker that calls the backend's `GET /jobs/cast-reminders` every five minutes, one Worker for prod and one for staging. The workflow `deploy-cron.yml` runs `just cron test` and `just cron deploy` for both on every merge that touches `cron/`. It needs the repository secrets `CLOUDFLARE_WORKER_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `CRON_SECRET`, the same value as the backend's.
+`cron/` is a Cloudflare Worker that calls the backend's `GET /jobs/cast-reminders` every five minutes, one Worker for prod and one for staging. Only prod has a cron trigger: staging shares the guild with prod, so a schedule there would post a second reminder card; run it with `wrangler dev --test-scheduled`. The workflow `deploy-cron.yml` runs `just cron test` and `just cron deploy` for both on every merge that touches `cron/`. It needs the repository secrets `CLOUDFLARE_WORKER_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` and `CRON_SECRET`, the same value as the backend's.
 
 ```
 cd cron && npx wrangler@3.114.17 tail                  # watch prod runs
