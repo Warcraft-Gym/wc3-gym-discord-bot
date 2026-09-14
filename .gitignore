@@ -4,3 +4,6 @@ node_modules/
 .vercel/
 .env
 .env.*
+
+# Built by the Pages workflow; just okf-graph writes a local preview
+docs/okf/index.html
