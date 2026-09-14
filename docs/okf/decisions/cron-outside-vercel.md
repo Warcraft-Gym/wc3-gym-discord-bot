@@ -2,7 +2,7 @@
 type: Decision
 title: The five-minute cron runs on Cloudflare
 description: The cast-reminder schedule is a Cloudflare Worker in this repository, because the backend's Vercel plan allows one cron a day.
-tags: [decision, cloudflare, cron]
+tags: [worker, deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: worker

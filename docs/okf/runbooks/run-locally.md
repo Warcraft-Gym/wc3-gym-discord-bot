@@ -2,8 +2,10 @@
 type: Runbook
 title: Run the adapter locally
 description: Install with uv, put the two values in .env, serve on port 5004, and send a signed request from the tests.
-tags: [runbook, local]
+resource: ../../../justfile
+tags: [deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+stale_after: 2027-03-14T00:00:00Z
 sources:
   - id: justfile
     resource: ../../../justfile

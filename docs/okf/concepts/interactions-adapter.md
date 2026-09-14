@@ -2,8 +2,9 @@
 type: Domain Concept
 title: The interactions adapter
 description: Discord posts every interaction here; the adapter verifies the signature, answers inside the 3 second window, and forwards the payload unchanged to the backend, which does the work.
-tags: [discord, adapter, starlette]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+resource: ../../../app.py
+tags: [discord]
+generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T17:00:00Z }
 sources:
   - id: app
     resource: ../../../app.py
@@ -34,3 +35,20 @@ No command name, no option, no reply text, no database. Adding a command is a ba
 # Why it exists
 
 The backend takes about 4 seconds to cold-start, past Discord's window. A one-file Starlette function starts in under a second. See [the decision](../decisions/separate-starlette-adapter.md).
+
+# Examples
+
+A slash command arrives, is acknowledged inside the window, and is forwarded unchanged:
+
+```http
+POST /interactions
+X-Signature-Ed25519: <hex signature over timestamp + body>
+X-Signature-Timestamp: <unix seconds>
+
+{"type": 2, "data": {"name": "upcoming"}}
+
+200 OK
+{"type": 5, "data": {"flags": 64}}
+```
+
+Then, after the response is sent: `POST $BACKEND_URL` with the same body and the same two headers. A PING `{"type": 1}` answers `{"type": 1}` at once and is never forwarded. A bad signature answers `401`.

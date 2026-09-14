@@ -2,7 +2,7 @@
 type: Pitfall
 title: A failed forward must clear the reply, a timed-out one must not
 description: A forward that fails outright leaves the deferred reply spinning until the token expires, so the adapter edits it; a read timeout means the backend may still be mid-write, so the adapter leaves it alone.
-tags: [pitfall, discord, timeout]
+tags: [discord, worker]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: app

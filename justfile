@@ -46,3 +46,25 @@ okf-graph:
     print(G.generate_visualization(Path("docs/okf"), Path("docs/okf/index.html"), bundle_name="wc3-gym-discord-bot knowledge bundle"))
     EOF
     sed -i 's#<head>#<head>\n  <meta name="robots" content="noindex, nofollow">#' docs/okf/index.html
+
+# Check docs/okf against OKF v0.2 with a third-party validator, the okf crate. Installs it once.
+okf-validate:
+    command -v okf >/dev/null || cargo install okf
+    okf validate docs/okf
+
+# List the concepts whose source files changed after the concept was written: the review list behind AGENTS.md rule 3.
+okf-drift:
+    #!/usr/bin/env -S uv run --no-project python
+    import re, subprocess, pathlib
+    from datetime import datetime
+    for p in sorted(pathlib.Path("docs/okf").rglob("*.md")):
+        if p.name in ("index.md", "log.md"): continue
+        fm = p.read_text().split("\n---\n", 1)[0]
+        at = re.search(r"generated: \{.*?at: (\S+?) ?\}", fm)
+        if not at: continue
+        written = datetime.fromisoformat(at.group(1).replace("Z", "+00:00"))
+        for src in re.findall(r"^\s+resource: (\.\S+)$", fm, re.M):
+            f = (p.parent / src).resolve()
+            stamp = subprocess.run(["git", "log", "-1", "--format=%cI", "--", f], capture_output=True, text=True).stdout.strip()
+            if stamp and datetime.fromisoformat(stamp) > written:
+                print(f"{p}  <-  {f.relative_to(pathlib.Path.cwd())} changed {stamp[:10]}")

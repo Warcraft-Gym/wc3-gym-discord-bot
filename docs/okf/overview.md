@@ -2,7 +2,8 @@
 type: Repository
 title: wc3-gym-discord-bot
 description: The Discord interactions adapter of the Warcraft Gym league app, one Starlette route on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.
-tags: [repository, discord, starlette, vercel, cloudflare]
+resource: https://github.com/Warcraft-Gym/wc3-gym-discord-bot
+tags: [discord, deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: readme

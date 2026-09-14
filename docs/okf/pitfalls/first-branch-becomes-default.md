@@ -2,7 +2,7 @@
 type: Pitfall
 title: The first pushed branch becomes the default
 description: An empty GitHub repository has no default branch; whatever is pushed first becomes it, and a feature branch pushed before main makes every later pull request target the wrong base.
-tags: [pitfall, git, github]
+tags: [tooling]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: source

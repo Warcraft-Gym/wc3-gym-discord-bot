@@ -2,7 +2,7 @@
 type: Pitfall
 title: Wrangler 4 needs a newer Node than the machines that deploy
 description: The cron justfile pins wrangler 3.114.17 because wrangler 4 requires Node 22, and a bare npx wrangler picks the latest and fails on an older Node.
-tags: [pitfall, cloudflare, wrangler, node]
+tags: [deploy, tooling]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: cron-justfile
