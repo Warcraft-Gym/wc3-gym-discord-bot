@@ -2,8 +2,10 @@
 type: Runbook
 title: Deploy the adapter and the Worker
 description: The adapter deploys to Vercel with just deploy; the Worker deploys to Cloudflare from a GitHub workflow on merge, or by hand with just cron deploy.
+resource: ../../../justfile
 tags: [runbook, deploy, vercel, cloudflare]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+stale_after: 2027-03-14T00:00:00Z
 sources:
   - id: justfile
     resource: ../../../justfile

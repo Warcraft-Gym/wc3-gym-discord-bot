@@ -2,6 +2,7 @@
 type: Domain Concept
 title: The interactions adapter
 description: Discord posts every interaction here; the adapter verifies the signature, answers inside the 3 second window, and forwards the payload unchanged to the backend, which does the work.
+resource: ../../../app.py
 tags: [discord, adapter, starlette]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:

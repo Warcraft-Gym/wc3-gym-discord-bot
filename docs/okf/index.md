@@ -8,7 +8,7 @@ This directory is an [Open Knowledge Format](https://github.com/GoogleCloudPlatf
 
 # Sections
 
-* [Overview](overview.md) - What the repository is, where it runs, its layout, and where to start.
+* [Overview](overview.md) - The Discord interactions adapter of the Warcraft Gym league app, one Starlette route on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.
 * [conventions](conventions/index.md) - The rules the code and the pull requests follow, and this bundle.
 * [concepts](concepts/index.md) - The interactions adapter, the cast-reminder Worker, and the backend contract as consumed here.
 * [runbooks](runbooks/index.md) - Run locally, deploy.

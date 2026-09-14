@@ -20,3 +20,9 @@
 3. A change to a fact the bundle states changes the concept in the same pull request and updates `generated.at`.
 
 The review that merges the pull request repeats step 1.
+
+## Working in this repository
+
+- `uv run just test` runs the suite and `uv run just lint` formats and lints. CI runs both.
+- The code rules live in the bundle: [code style](docs/okf/conventions/code-style.md).
+- `just okf-validate` checks the bundle with a third-party OKF validator.
