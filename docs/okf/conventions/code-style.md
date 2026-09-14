@@ -3,7 +3,7 @@ type: Convention
 title: Code style
 description: One Python file on the standard library and Starlette, formatted and linted by ruff, with a Worker in plain JavaScript beside it.
 resource: ../../../pyproject.toml
-tags: [python, style, tooling]
+tags: [tooling]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: pyproject

@@ -2,7 +2,7 @@
 type: Pitfall
 title: The staging Worker inherited the production schedule
 description: Wrangler environments inherit triggers, so the staging Worker ran the five-minute reminder cron; the staging environment now sets an empty cron list on purpose.
-tags: [pitfall, cloudflare, wrangler, cron]
+tags: [worker, deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: config

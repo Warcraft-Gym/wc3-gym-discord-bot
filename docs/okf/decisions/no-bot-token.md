@@ -2,7 +2,7 @@
 type: Decision
 title: The adapter holds no bot token
 description: The adapter talks to Discord only through the interaction token of the request it is handling, so a leak of this project leaks nothing that can act as the bot.
-tags: [decision, discord, security]
+tags: [discord]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: app

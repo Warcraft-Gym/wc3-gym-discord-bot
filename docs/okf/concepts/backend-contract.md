@@ -3,7 +3,7 @@ type: Integration
 title: The backend contract, as consumed here
 description: The two backend routes this repository calls, the headers they need, and the environment values on each side.
 resource: ../../../app.py
-tags: [backend, contract]
+tags: [backend]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: app

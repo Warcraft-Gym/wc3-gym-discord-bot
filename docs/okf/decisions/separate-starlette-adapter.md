@@ -2,7 +2,7 @@
 type: Decision
 title: A separate one-file Starlette app
 description: The interactions endpoint is its own repository and Vercel project, one Starlette route on the standard library, because the backend cold-starts past Discord's window.
-tags: [decision, starlette, vercel]
+tags: [discord, deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: source

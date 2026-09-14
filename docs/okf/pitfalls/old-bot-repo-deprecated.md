@@ -2,7 +2,7 @@
 type: Pitfall
 title: The old bot repository is not this one
 description: An older discord.js bot repository on the Flask and Azure stack still exists in the organisation; it is deprecated, and no change or pull request goes there.
-tags: [pitfall, repository]
+tags: [discord]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: source

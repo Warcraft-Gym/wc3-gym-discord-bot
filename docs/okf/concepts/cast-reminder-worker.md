@@ -3,7 +3,7 @@ type: Domain Concept
 title: The cast-reminder Worker
 description: A Cloudflare Worker calls the backend's reminder job every five minutes, because the backend's hosting plan runs one cron a day.
 resource: ../../../cron/index.js
-tags: [cloudflare, worker, cron]
+tags: [worker, deploy]
 generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
 sources:
   - id: worker
