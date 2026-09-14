@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<!--
+  Copyright 2026 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<title>OKF Bundle Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<style>
+/*
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.title strong { font-size: 16px; margin-right: 8px; }
+.muted { color: #64748b; font-size: 12px; }
+.controls { display: flex; gap: 8px; }
+.controls input, .controls select, .controls button {
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+}
+.controls input { width: 220px; }
+.controls button { cursor: pointer; background: #f1f5f9; }
+.controls button:hover { background: #e2e8f0; }
+
+main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+#graph {
+  flex: 1 1 60%;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  min-width: 0;
+  position: relative;
+}
+#detail {
+  flex: 0 0 40%;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: #fff;
+}
+#detail-empty {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.detail-header { margin-bottom: 12px; }
+.detail-header h1 {
+  font-size: 18px;
+  margin: 4px 0 2px;
+  font-weight: 600;
+}
+.type-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+dl.frontmatter {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  row-gap: 4px;
+  column-gap: 12px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+}
+dl.frontmatter dt {
+  color: #64748b;
+  font-weight: 500;
+}
+dl.frontmatter dd { margin: 0; }
+dl.frontmatter a { color: #2563eb; word-break: break-all; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  margin: 0 4px 2px 0;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.badge.status-stable { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.badge.status-draft { background: #fefce8; color: #a16207; border-color: #fde68a; }
+.badge.status-deprecated { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; text-decoration: line-through; }
+.badge.trust-unverified { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+.badge.trust-machine-confirmed { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.badge.trust-human-reviewed { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.badge.stale { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.badge.fresh { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+
+.sources-list { padding-left: 18px; margin: 0; }
+.sources-list li { margin: 1px 0; }
+
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+
+#detail-body { font-size: 13px; line-height: 1.55; }
+#detail-body h1 {
+  font-size: 16px; margin: 18px 0 6px;
+  padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+}
+#detail-body h2 { font-size: 14px; margin: 14px 0 4px; }
+#detail-body h3 { font-size: 13px; margin: 12px 0 4px; }
+#detail-body p { margin: 6px 0; }
+#detail-body code {
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+#detail-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 12px;
+}
+#detail-body pre code { background: transparent; color: inherit; padding: 0; }
+#detail-body ul, #detail-body ol { padding-left: 22px; margin: 6px 0; }
+#detail-body li { margin: 2px 0; }
+#detail-body table { border-collapse: collapse; margin: 8px 0; }
+#detail-body th, #detail-body td {
+  border: 1px solid #e2e8f0; padding: 4px 8px; font-size: 12px;
+}
+#detail-body a.internal { color: #2563eb; cursor: pointer; }
+#detail-body a.external { color: #2563eb; }
+
+#detail-backlinks { margin-top: 18px; }
+#detail-backlinks h2 { font-size: 13px; color: #64748b; margin-bottom: 6px; }
+#detail-backlinks ul { padding-left: 18px; }
+#detail-backlinks a { color: #2563eb; cursor: pointer; }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <strong id="bundle-name"></strong>
+    <span class="muted">OKF bundle</span>
+  </div>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search title / id / tag">
+    <select id="filter-type">
+      <option value="">All types</option>
+    </select>
+    <select id="layout">
+      <option value="cose">cose (force)</option>
+      <option value="concentric">concentric</option>
+      <option value="breadthfirst">breadth-first</option>
+      <option value="circle">circle</option>
+      <option value="grid">grid</option>
+    </select>
+    <button id="reset">Reset view</button>
+  </div>
+</header>
+
+<main>
+  <section id="graph"></section>
+  <section id="detail">
+    <div id="detail-empty" class="muted">Click a node to see its details.</div>
+    <article id="detail-content" hidden>
+      <header class="detail-header">
+        <span class="type-chip" id="detail-type"></span>
+        <h1 id="detail-title"></h1>
+        <div class="muted" id="detail-id"></div>
+      </header>
+      <div class="badges" id="detail-badges"></div>
+      <dl class="frontmatter">
+        <dt>Description</dt><dd id="detail-description"></dd>
+        <dt>Resource</dt><dd id="detail-resource"></dd>
+        <dt>Tags</dt><dd id="detail-tags"></dd>
+        <dt>Generated</dt><dd id="detail-generated"></dd>
+        <dt>Verified</dt><dd id="detail-verified"></dd>
+        <dt>Sources</dt><dd id="detail-sources"></dd>
+      </dl>
+      <hr>
+      <div id="detail-body"></div>
+      <section id="detail-backlinks" hidden>
+        <h2>Cited by</h2>
+        <ul id="backlinks-list"></ul>
+      </section>
+    </article>
+  </section>
+</main>
+
+<script>
+window.BUNDLE_NAME = "wc3-gym-discord-bot knowledge bundle";
+window.BUNDLE = {"nodes": [{"data": {"id": "concepts/backend-contract", "label": "The backend contract, as consumed here", "type": "Integration", "description": "The two backend routes this repository calls, the headers they need, and the environment values on each side.", "resource": "", "tags": ["backend", "contract"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "app", "resource": "../../../app.py", "title": "The forward"}, {"id": "worker", "resource": "../../../cron/index.js", "title": "The job call"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 36}}, {"data": {"id": "concepts/cast-reminder-worker", "label": "The cast-reminder Worker", "type": "Domain Concept", "description": "A Cloudflare Worker calls the backend's reminder job every five minutes, because the backend's hosting plan runs one cron a day.", "resource": "", "tags": ["cloudflare", "worker", "cron"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "worker", "resource": "../../../cron/index.js", "title": "The Worker"}, {"id": "config", "resource": "../../../cron/wrangler.jsonc", "title": "The schedule and the two environments"}, {"id": "tests", "resource": "../../../cron/index.test.js", "title": "The Worker's tests"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 36}}, {"data": {"id": "concepts/interactions-adapter", "label": "The interactions adapter", "type": "Domain Concept", "description": "Discord posts every interaction here; the adapter verifies the signature, answers inside the 3 second window, and forwards the payload unchanged to the backend, which does the work.", "resource": "", "tags": ["discord", "adapter", "starlette"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "app", "resource": "../../../app.py", "title": "The adapter"}, {"id": "tests", "resource": "../../../tests/test_app.py", "title": "The adapter's whole contract as tests"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 40}}, {"data": {"id": "conventions/code-style", "label": "Code style", "type": "Convention", "description": "One Python file on the standard library and Starlette, formatted and linted by ruff, with a Worker in plain JavaScript beside it.", "resource": "", "tags": ["python", "style", "tooling"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "pyproject", "resource": "../../../pyproject.toml", "title": "Dependencies and ruff"}, {"id": "justfile", "resource": "../../../justfile", "title": "The recipes"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 35}}, {"data": {"id": "conventions/okf-bundle", "label": "How this bundle is written", "type": "Convention", "description": "The rules for every file under docs/okf, and the one rule for talking about the other repositories.", "resource": "", "tags": ["okf", "documentation"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "okf-spec", "resource": "https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md", "title": "Open Knowledge Format v0.2 specification"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 57}}, {"data": {"id": "decisions/cron-outside-vercel", "label": "The five-minute cron runs on Cloudflare", "type": "Decision", "description": "The cast-reminder schedule is a Cloudflare Worker in this repository, because the backend's Vercel plan allows one cron a day.", "resource": "", "tags": ["decision", "cloudflare", "cron"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "worker", "resource": "../../../cron/index.js", "title": "The Worker"}, {"id": "source", "resource": "Maintainers' decision, 2026-09-09", "title": "Where the schedule lives"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 35}}, {"data": {"id": "decisions/no-bot-token", "label": "The adapter holds no bot token", "type": "Decision", "description": "The adapter talks to Discord only through the interaction token of the request it is handling, so a leak of this project leaks nothing that can act as the bot.", "resource": "", "tags": ["decision", "discord", "security"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "app", "resource": "../../../app.py", "title": "tell()"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 34}}, {"data": {"id": "decisions/separate-starlette-adapter", "label": "A separate one-file Starlette app", "type": "Decision", "description": "The interactions endpoint is its own repository and Vercel project, one Starlette route on the standard library, because the backend cold-starts past Discord's window.", "resource": "", "tags": ["decision", "starlette", "vercel"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "source", "resource": "Measured cold starts, 2026-09-05 and 2026-09-06", "title": "The adapter's cold start"}, {"id": "readme", "resource": "../../../README.md", "title": "README"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 36}}, {"data": {"id": "log", "label": "log", "type": "Unknown", "description": "", "resource": "", "tags": [], "status": "stable", "generated": {}, "verified": [], "stale_after": "", "sources": [], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 31}}, {"data": {"id": "overview", "label": "wc3-gym-discord-bot", "type": "Repository", "description": "The Discord interactions adapter of the Warcraft Gym league app, one Starlette route on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.", "resource": "", "tags": ["repository", "discord", "starlette", "vercel", "cloudflare"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "readme", "resource": "../../README.md", "title": "README"}, {"id": "pyproject", "resource": "../../pyproject.toml", "title": "Project metadata"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 39}}, {"data": {"id": "pitfalls/first-branch-becomes-default", "label": "The first pushed branch becomes the default", "type": "Pitfall", "description": "An empty GitHub repository has no default branch; whatever is pushed first becomes it, and a feature branch pushed before main makes every later pull request target the wrong base.", "resource": "", "tags": ["pitfall", "git", "github"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "source", "resource": "Maintainers' observation, 2026-09-06", "title": "Creating this repository"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 32}}, {"data": {"id": "pitfalls/old-bot-repo-deprecated", "label": "The old bot repository is not this one", "type": "Pitfall", "description": "An older discord.js bot repository on the Flask and Azure stack still exists in the organisation; it is deprecated, and no change or pull request goes there.", "resource": "", "tags": ["pitfall", "repository"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "source", "resource": "Maintainers' decision, 2026-09-12", "title": "Which repository is the Discord integration"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 32}}, {"data": {"id": "pitfalls/read-timeout-left-alone", "label": "A failed forward must clear the reply, a timed-out one must not", "type": "Pitfall", "description": "A forward that fails outright leaves the deferred reply spinning until the token expires, so the adapter edits it; a read timeout means the backend may still be mid-write, so the adapter leaves it alone.", "resource": "", "tags": ["pitfall", "discord", "timeout"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "app", "resource": "../../../app.py", "title": "forward_later()"}, {"id": "tests", "resource": "../../../tests/test_app.py", "title": "The failure and timeout tests"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 34}}, {"data": {"id": "pitfalls/staging-worker-ran-the-cron", "label": "The staging Worker inherited the production schedule", "type": "Pitfall", "description": "Wrangler environments inherit triggers, so the staging Worker ran the five-minute reminder cron; the staging environment now sets an empty cron list on purpose.", "resource": "", "tags": ["pitfall", "cloudflare", "wrangler", "cron"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "config", "resource": "../../../cron/wrangler.jsonc", "title": "The empty cron list"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 32}}, {"data": {"id": "pitfalls/wrangler-version", "label": "Wrangler 4 needs a newer Node than the machines that deploy", "type": "Pitfall", "description": "The cron justfile pins wrangler 3.114.17 because wrangler 4 requires Node 22, and a bare npx wrangler picks the latest and fails on an older Node.", "resource": "", "tags": ["pitfall", "cloudflare", "wrangler", "node"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "cron-justfile", "resource": "../../../cron/justfile", "title": "The pin"}, {"id": "workflow", "resource": "../../../.github/workflows/deploy-cron.yml", "title": "CI on Node 22"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 33}}, {"data": {"id": "runbooks/deploy", "label": "Deploy the adapter and the Worker", "type": "Runbook", "description": "The adapter deploys to Vercel with just deploy; the Worker deploys to Cloudflare from a GitHub workflow on merge, or by hand with just cron deploy.", "resource": "", "tags": ["runbook", "deploy", "vercel", "cloudflare"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "justfile", "resource": "../../../justfile", "title": "just deploy"}, {"id": "cron-justfile", "resource": "../../../cron/justfile", "title": "just cron deploy"}, {"id": "workflow", "resource": "../../../.github/workflows/deploy-cron.yml", "title": "The Worker workflow"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 37}}, {"data": {"id": "runbooks/run-locally", "label": "Run the adapter locally", "type": "Runbook", "description": "Install with uv, put the two values in .env, serve on port 5004, and send a signed request from the tests.", "resource": "", "tags": ["runbook", "local"], "status": "stable", "generated": {"by": "claude-code/claude-fable-5-1", "at": "2026-09-14T10:00:00Z"}, "verified": [], "stale_after": "", "sources": [{"id": "justfile", "resource": "../../../justfile", "title": "The recipes"}, {"id": "readme", "resource": "../../../README.md", "title": "README"}], "trust_tier": "unverified", "stale": false, "color": "#94a3b8", "size": 35}}], "edges": [{"data": {"id": "concepts/interactions-adapter__concepts/backend-contract", "source": "concepts/interactions-adapter", "target": "concepts/backend-contract"}}, {"data": {"id": "concepts/interactions-adapter__decisions/separate-starlette-adapter", "source": "concepts/interactions-adapter", "target": "decisions/separate-starlette-adapter"}}, {"data": {"id": "conventions/code-style__conventions/okf-bundle", "source": "conventions/code-style", "target": "conventions/okf-bundle"}}, {"data": {"id": "decisions/cron-outside-vercel__concepts/cast-reminder-worker", "source": "decisions/cron-outside-vercel", "target": "concepts/cast-reminder-worker"}}, {"data": {"id": "decisions/cron-outside-vercel__pitfalls/wrangler-version", "source": "decisions/cron-outside-vercel", "target": "pitfalls/wrangler-version"}}, {"data": {"id": "decisions/no-bot-token__concepts/backend-contract", "source": "decisions/no-bot-token", "target": "concepts/backend-contract"}}, {"data": {"id": "decisions/separate-starlette-adapter__concepts/interactions-adapter", "source": "decisions/separate-starlette-adapter", "target": "concepts/interactions-adapter"}}, {"data": {"id": "overview__concepts/interactions-adapter", "source": "overview", "target": "concepts/interactions-adapter"}}, {"data": {"id": "overview__concepts/backend-contract", "source": "overview", "target": "concepts/backend-contract"}}, {"data": {"id": "overview__concepts/cast-reminder-worker", "source": "overview", "target": "concepts/cast-reminder-worker"}}, {"data": {"id": "overview__runbooks/run-locally", "source": "overview", "target": "runbooks/run-locally"}}, {"data": {"id": "overview__runbooks/deploy", "source": "overview", "target": "runbooks/deploy"}}, {"data": {"id": "overview__conventions/code-style", "source": "overview", "target": "conventions/code-style"}}, {"data": {"id": "runbooks/run-locally__concepts/cast-reminder-worker", "source": "runbooks/run-locally", "target": "concepts/cast-reminder-worker"}}], "bodies": {"concepts/backend-contract": "The backend repository, `wc3-gym-backend`, owns both routes and every command, card and reply. This file says only what this repository sends.\n\n| Route | Sent by | Headers | Answer relied on |\n|---|---|---|---|\n| `POST /discord/interactions` | the adapter | `Content-Type: application/json`, `X-Signature-Ed25519`, `X-Signature-Timestamp`, the body as Discord sent it | for an autocomplete, the JSON to relay as is; for everything else, nothing, because the backend edits the deferred reply itself |\n| `GET /jobs/cast-reminders` | the Worker | `Authorization: Bearer <CRON_SECRET>` | a 2xx; the body is logged |\n\n# Environment values\n\n| Where | Name | Meaning |\n|---|---|---|\n| the adapter | `DISCORD_PUBLIC_KEY` | the application's public key from the Developer Portal; the backend holds the same value |\n| the adapter | `BACKEND_URL` | the interactions route in full |\n| the Worker | `BACKEND_API_URL` | the backend origin |\n| the Worker | `CRON_SECRET` | the bearer the backend's job routes check |\n\nThe backend answers 503 on the interactions route while its own copy of the public key is unset, and on every job route while its cron secret is unset. A 503 from the forward means a backend configuration gap, not an adapter fault.", "concepts/cast-reminder-worker": "# What it does\n\nOn every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminders` with `Authorization: Bearer <CRON_SECRET>`. A refused or failed call throws, so the failure shows in the Worker's Cron Events; a good call logs the backend's answer.\n\n# Two environments\n\n| Environment | Name | Schedule | Backend |\n|---|---|---|---|\n| production | `wc3-gym-cast-reminders` | every five minutes | the production backend |\n| staging | `wc3-gym-cast-reminders-staging` | none; run on demand with `wrangler dev --test-scheduled` | the staging backend alias |\n\n`triggers` is an inheritable key in the Wrangler configuration, so the staging environment sets an empty cron list on purpose; without it the production schedule would apply there too.\n\n# Secrets\n\n`CRON_SECRET` is a Worker secret, never a plain variable, set by `just cron deploy` from the environment. It is the same value the backend checks. `BACKEND_API_URL` is a plain variable per environment.\n\n# Deploy\n\n`deploy-cron.yml` runs `just cron test` and `just cron deploy` for both environments on every merge that touches `cron/`. It needs the repository secrets for the Cloudflare token, the account id and the cron secret. By hand: `cd cron && just deploy staging`. Watch a run with `npx wrangler@3 tail` in `cron/`, with `--env staging` for staging.", "concepts/interactions-adapter": "# The flow\n\n1. Discord sends a POST to `/interactions` with the body signed over `timestamp + body`, in the headers `X-Signature-Ed25519` and `X-Signature-Timestamp`.\n2. The adapter verifies the signature with the application's public key, `DISCORD_PUBLIC_KEY`. A bad or missing signature answers 401 and nothing else happens.\n3. A PING (type 1) answers PONG (type 1). That is what the Developer Portal sends when the endpoint URL is saved.\n4. An autocomplete (type 4) has no deferred form. The adapter forwards it and waits up to 2 seconds inside the window; a slow or cold backend gets an empty choice list, which beats no answer.\n5. Everything else (a command, a button press) answers at once with a deferred private reply (type 5, ephemeral flag), and a background task forwards the payload to the backend after the response is sent. The backend edits the deferred reply through the interaction token, or posts a public follow-up in the channel.\n\n# The forward\n\n`BACKEND_URL` names the backend route in full. The body and the two signature headers go across unchanged, so the backend verifies the same signature again and trusts nothing but Discord. The forward waits up to 60 seconds, the backend's own function limit.\n\nWhen the forward fails outright (a refused connection, an HTTP error), the backend will never edit the reply, so the adapter edits it itself with a short \"try again\" text, through the interaction token. A read timeout is left alone: the backend may be mid-write and will edit the reply itself. The adapter needs no bot token for either, because the interaction token is the whole authorisation.\n\n# What the adapter does not know\n\nNo command name, no option, no reply text, no database. Adding a command is a backend change; the adapter changes only when the handshake with Discord changes. See [the backend contract](backend-contract.md).\n\n# Why it exists\n\nThe backend takes about 4 seconds to cold-start, past Discord's window. A one-file Starlette function starts in under a second. See [the decision](../decisions/separate-starlette-adapter.md).", "conventions/code-style": "- Python 3.13, managed by `uv`. `uv run just test` runs pytest; `uv run just lint` runs `ruff check` and `ruff format --check`.\n- The adapter is one module, `app.py`, on Starlette and the standard library's `urllib`. It carries no HTTP client library, no bot token and no command list. Everything that knows a command lives in the backend.\n- The adapter reads its two environment values at import, so the test module sets them before importing it.\n- The Worker in `cron/` is one ES module with one test file on node's own runner. Wrangler is pinned to a 3.x version because 4.x needs a newer Node than the machines that run it.\n- Comments describe the current state on one line, in the present tense. Prose uses short plain sentences; see [the writing rule](okf-bundle.md).\n- Every pull request is one branch and one squash merge into `main`, with the same branch prefixes and attribution rules as the backend: `feature/`, `fix/`, `refactor/`, `chore/`; an agent's text in a pull request body says so; a co-written commit ends with a `Co-Authored-By` trailer; never override the author; never a closing keyword on an issue.", "conventions/okf-bundle": "# What this bundle is\n\n`docs/okf/` is an Open Knowledge Format (OKF) bundle: a directory of markdown files with YAML frontmatter, readable by a person and by an AI agent. Each file is one concept. The file path is the concept id. `index.md` lists a directory and `log.md` records changes; every other `.md` file is a concept.\n\nThe bundle exists so that a new contributor, human or agent, can read how the app works, why it works that way, and which mistakes were already made, without asking the people who built it.\n\n# Frontmatter\n\nEvery concept starts with a YAML block. `type` is required. The types this bundle uses:\n\n| type | What the file holds |\n|---|---|\n| Repository | the one overview of this repository |\n| Convention | a rule the code follows |\n| Domain Concept | a thing the league runs on, and how the app models it |\n| Data Model | tables and model families |\n| API Area | a group of routes and their rules |\n| Integration | how this repository talks to a service outside it |\n| Runbook | steps to do one operational task |\n| Decision | a choice that was made, when, and why it stands |\n| Pitfall | a mistake that was made once, and how to not repeat it |\n\nThe other fields: `title`, `description` (one sentence), `tags`, `generated: { by, at }` (who wrote the current text and when), `verified: [{ by, at }]` (who checked it against the code), `status` (`draft`, `stable` by default, `deprecated`), `stale_after`, and `sources` (what the text was written from).\n\n`generated.by` names the writer: `human:<github handle>` for a person, `<tool>/<model>` for an agent. A concept with no `verified` entry is unverified. When a maintainer reads a concept against the code and finds it true, they add a `verified` entry with their own handle. Nobody adds one for someone else.\n\n# Sources and links\n\nA concept names what it was written from in `sources`. A source inside this repository is a relative path from the concept file, for example `../../../app.py`, so the link works on GitHub and survives a rename of the repository. A source outside the repository is a URL, or a short description when there is no URL, for example `Maintainers' decision, 2026-09-08`.\n\nLinks between concepts are relative markdown links, for example `../decisions/derived-not-stored.md`. The OKF spec prefers bundle-absolute links that start with `/`. This bundle uses relative links because GitHub renders them and bundle-absolute ones break there.\n\n# The one rule about other repositories\n\nThe app is three repositories: the backend, the frontend and the Discord adapter. Each has its own bundle. A bundle describes only what its own repository proves, plus the decisions that shaped it.\n\nA shared fact is owned by one repository:\n\n- the backend (`wc3-gym-backend`) owns the domain model, the API contract, the roles, the settings keys and the environment variable names it reads;\n- the frontend (`wc3-gym-frontend`) owns its pages, its design rules and the way it consumes the API;\n- the Discord adapter (this repository) owns the interaction handshake and the cron worker.\n\nAnother repository is named only through its contract: an HTTP route, a header, a query parameter, an environment variable name, a Discord payload shape. Never a file path into another repository, and never a link to a file in another bundle. Those paths move without telling anyone.\n\nEach bundle's `index.md` has one section, \"Neighbouring bundles\", that names the other repositories by their GitHub root. That is the only cross-repository pointer, one line per neighbour, so a moved repository costs one line in each neighbour.\n\nWhere a concept must be understood on both sides, the consuming repository writes a short \"as consumed here\" concept that names the fields it relies on, and says in prose which repository owns the definition. It does not copy the definition.\n\nTests keep the two sides in step, not prose. The backend pins the response shapes its consumers read in `tests/test_public_contract.py`, `tests/test_contract.py`, `tests/test_gnl_snapshot.py` and `tests/test_error_envelope.py`. A change to one of those tests is a change to a contract and needs a change in a consumer.\n\n# Writing\n\nWrite short sentences: one fact per sentence, the present tense, the active voice. Say what is, not what used to be. A decision says when it was made and why. Never name a person and never quote one: write \"the maintainers\" and summarise what was concluded.\n\nThe bundle is public. Never write a secret, a token, a database URL, an account or guild id, or any detail about a person into it. The full list of what never goes in, and the check to run before a commit, is [`AGENTS.md`](../../../AGENTS.md) at the repository root.\n\n# Keeping it true\n\n- A pull request that changes a fact this bundle states changes the concept in the same pull request and updates `generated.at`.\n- A concept that no longer holds gets `status: deprecated` and one line naming what replaced it. It is not deleted, so links keep working.\n- `log.md` gets one line per change, newest first.\n- `index.html` beside the root `index.md` is the graph viewer from the OKF reference repository, served by GitHub Pages from `docs/`; `just okf-graph` regenerates it after a change to the bundle. It carries a no-index tag and is not a concept.\n- `uv run just test` runs `tests/test_okf.py`. It checks that every concept has a `type`, that `index.md` files carry no frontmatter except the root one, and that every relative link resolves to a file.", "decisions/cron-outside-vercel": "# Decision\n\nThe backend exposes the reminder job as `GET /jobs/cast-reminders`, guarded by a bearer secret. The schedule that calls it every five minutes is a Cloudflare Worker in `cron/`, deployed by this repository's workflow.\n\n# Why\n\n- The backend's Vercel Hobby plan runs a cron at most once a day, and a more frequent schedule in `vercel.json` fails the whole deployment.\n- A Worker's cron trigger is free at this volume, runs from Cloudflare's edge, and lists every run with its result.\n- This repository already owns the Discord side of the app, so the reminder cadence sits with the other Discord plumbing rather than in a fourth repository.\n\n# Consequences\n\n- The backend stays the only place that knows what a reminder is. The Worker sends one request and reports the status.\n- Staging has a Worker with no schedule, because a schedule there would post duplicate reminders. See [the Worker](../concepts/cast-reminder-worker.md).\n- Wrangler is pinned to a 3.x version. See [the pitfall](../pitfalls/wrangler-version.md).", "decisions/no-bot-token": "# Decision\n\nThe adapter's only Discord credential is the application's public key, which verifies signatures and can sign nothing. When the adapter must edit a reply itself, it uses the interaction token in the payload, through the webhook route `PATCH /webhooks/{application_id}/{token}/messages/@original`. That token is valid for 15 minutes and for that one interaction.\n\n# Why\n\n- The bot token can post in any channel, manage roles and read history. The adapter needs none of that.\n- The backend already holds the bot token and does every write that needs it. Two copies of a secret double the places it can leak.\n- The interaction token is enough for the one thing the adapter does on its own: telling the member that the backend did not answer.\n\n# Consequences\n\n- A new feature that needs the bot token is backend work, whatever it looks like from Discord's side.\n- The adapter's environment is two values. See [the backend contract](../concepts/backend-contract.md).", "decisions/separate-starlette-adapter": "# Decision\n\nDiscord posts to this repository, not to the backend. The adapter is one Starlette route that verifies, acknowledges and forwards. It is its own Vercel project, deployed from its own repository.\n\n# Why\n\n- Discord drops an interaction that is not answered within 3 seconds. Measured after idle, the backend app cold-starts in about 4 seconds; a one-file Python function cold-starts in about 0.85 seconds.\n- The Vercel Python preset builds one function per project and routes every path to it, so a second small function cannot live in the backend project.\n- Starlette was chosen over FastAPI because FastAPI's import alone costs about 0.4 seconds of the budget. `urllib` was chosen over an HTTP client library for the same reason: nothing to import.\n\n# Consequences\n\n- The adapter changes only when the handshake with Discord changes. Every command, reply and card is backend code.\n- The backend verifies the same signature again, so the adapter is not a trust boundary the backend relies on.\n- A Starlette background task on the response is the after-response hook on Vercel Python. The forward runs there, within the 60 second function limit. See [the adapter](../concepts/interactions-adapter.md).", "log": "# Bundle history\n\n## 2026-09-14\n\n* **Creation**: Established the bundle: conventions, concepts, runbooks, decisions and pitfalls, written from the code on `main`, the README, and the maintainers' recorded decisions. Every concept is `generated` by an agent and carries no `verified` entry yet.\n", "overview": "# What it is\n\nDiscord posts every slash command, button press and autocomplete of the Gym Newbie League (GNL) app to this adapter. The adapter checks Discord's signature, answers inside Discord's 3 second window, and forwards the signed payload unchanged to the backend, which checks the same signature again and does the work. The adapter knows no command and holds no bot token.\n\nBeside it, `cron/` is a Cloudflare Worker that calls the backend's cast-reminder job every five minutes, because the backend's hosting plan runs one cron a day.\n\n# Where it runs\n\n| Target | What |\n|---|---|\n| production | a Vercel project built from `main`; the Discord application's Interactions Endpoint URL points at it |\n| preview | every pull request; Discord is not pointed at previews |\n| local | `uv run just dev` on port 5004 |\n| the Worker | Cloudflare, one Worker for production with a schedule and one for staging without |\n\n# Layout\n\n```\napp.py        the adapter: verify, answer, forward\ntests/        the handshake as tests, and the bundle check\ncron/         the Worker: index.js, its test, wrangler.jsonc, its justfile\njustfile      test, lint, dev, deploy; `mod cron` for the Worker\nvercel.json   maxDuration 60 for the background forward\ndocs/okf/     this bundle\n```\n\n# Start here\n\n1. [The interactions adapter](concepts/interactions-adapter.md), then [the backend contract](concepts/backend-contract.md).\n2. [The cast-reminder Worker](concepts/cast-reminder-worker.md).\n3. [Run locally](runbooks/run-locally.md), [deploy](runbooks/deploy.md).\n4. Before a change: [code style](conventions/code-style.md), the [decisions](decisions/index.md) and the [pitfalls](pitfalls/index.md).\n\n# Contributing\n\nThe maintainers build with AI coding agents and review every pull request before it merges. Almost every Discord feature is backend work; a change lands here only when the handshake with Discord or the reminder schedule changes.", "pitfalls/first-branch-becomes-default": "# What happened\n\nThis repository was created empty and the adapter was developed on a feature branch. Pushing that branch first would have made it the default branch, so that every pull request opened afterwards would target it instead of `main`.\n\n# The rule\n\nPush `main` first, even with one commit, then the feature branch. In a new repository, check the default branch in the repository settings before opening the first pull request. If a wrong branch is already the default, change it in the settings and retarget the open pull requests with `gh pr edit <n> --base main`.", "pitfalls/old-bot-repo-deprecated": "# What happened\n\nThe organisation holds an older Discord bot, written in JavaScript against the previous Flask backend on Azure. A search for a stale configuration key found a hit only in that repository, and a change was proposed there. That repository serves the old stack, and nothing built now runs through it.\n\n# The rule\n\nThe Discord integration is this repository plus the backend's interaction routes. A finding that exists only in the old repository is not a bug to fix. Never open a pull request there. The old bot is outside this app's development.", "pitfalls/read-timeout-left-alone": "# What happened\n\nThe first adapter answered the deferred reply and forwarded, with nothing on the failure path. When the backend refused the connection, nobody edited the deferred reply, so the member watched it spin until the interaction token expired 15 minutes later.\n\n# The rule\n\n`forward_later` edits the deferred reply with a short \"try again\" text only when the forward fails outright: a refused connection, a DNS failure, an HTTP error. A `TimeoutError` is logged and left alone, because the forward's timeout equals the backend's own function limit; a timeout means the backend is at its limit and may still edit the reply itself. Two edits of the same reply would show the member two contradicting messages. The edit uses the interaction token, so the adapter still holds no bot token. Tests in `tests/test_app.py` pin both branches.", "pitfalls/staging-worker-ran-the-cron": "# What happened\n\nThe staging Worker was added as a Wrangler environment with only its own backend URL. `triggers` is an inheritable key, so the staging Worker ran the production five-minute schedule against the staging backend: 288 calls a day. A schedule there would post duplicate reminders.\n\n# The rule\n\nThe staging environment in `cron/wrangler.jsonc` sets `\"triggers\": { \"crons\": [] }`. Keep that line through every change to the file. Run the staging Worker on demand with `wrangler dev --test-scheduled`. Any new Wrangler environment must state its own `triggers`, even an empty one.", "pitfalls/wrangler-version": "# What happened\n\nA bare `npx wrangler` resolved to the 4.x line, which refuses to run on Node below 22. The same command worked in CI on Node 22, so the failure showed only locally and looked like a broken install.\n\n# The rule\n\nCall wrangler only through the `wrangler` variable in `cron/justfile`, which pins `npx --yes wrangler@3.114.17`. The README's `tail` commands carry the same pin. To move to wrangler 4, raise Node on every machine that deploys first, then change the one pin. `triggers` is inheritable across Wrangler environments, so keep the explicit empty cron list on the staging environment through any upgrade.", "runbooks/deploy": "# The adapter\n\nThe Vercel project is linked to this repository. A push to `main` deploys production; a pull request deploys a preview. By hand, from the linked checkout:\n\n```\njust deploy staging   # a preview from the working tree\njust deploy           # promotes the working tree to production\n```\n\nThe project holds `DISCORD_PUBLIC_KEY` and `BACKEND_URL` as environment values. `vercel.json` sets `maxDuration` to 60 seconds so the background forward is not cut. After the first deploy, paste the production URL plus `/interactions` into the Interactions Endpoint URL field of the Discord Developer Portal; the save succeeds when the adapter answers the PING.\n\n# The Worker\n\nEvery merge that touches `cron/` runs `deploy-cron.yml`: `just cron test`, then `just cron deploy staging`, then `just cron deploy prod`. The workflow reads three repository secrets: a Cloudflare API token with Worker edit rights, the Cloudflare account id, and the cron secret the backend checks. Run the workflow by hand from the Actions tab with `workflow_dispatch`.\n\nBy hand, with the same three values in the environment:\n\n```\njust cron deploy staging\njust cron deploy\n```\n\n`just cron deploy` deploys, then writes `CRON_SECRET` as a Worker secret from the environment. It refuses to run when the value is unset.\n\n# Check a deploy\n\n- The adapter: `GET /health` answers `{\"ok\": true}`. A real check is a slash command in the guild.\n- The Worker: `cd cron && npx wrangler@3 tail` streams the next scheduled run. Cron Events in the Cloudflare dashboard list every run and whether it threw.", "runbooks/run-locally": "# Steps\n\n1. Install the tools: `uv` and `just`. `uv sync` installs Python 3.13 and the dependencies from `uv.lock`.\n2. Create `.env` with `DISCORD_PUBLIC_KEY` and `BACKEND_URL`. The file is ignored by git. `BACKEND_URL` may point at a local backend, for example `http://localhost:5000/discord/interactions`.\n3. `uv run just dev` serves the adapter on port 5004 with the values from `.env`.\n4. `uv run just test` runs the adapter tests and the bundle check. The tests sign their own requests with a throwaway key, so no Discord application is needed.\n5. `uv run just lint` runs ruff.\n\n# Facts\n\n- Discord cannot reach a local port, so a real command never arrives locally. The tests are the way to exercise the handshake; a tunnel is the way to test against Discord itself.\n- The adapter reads its two values at import. A missing value fails at start with a `KeyError`, not on the first request.\n- The Worker in `cron/` runs with `cd cron && npx wrangler@3 dev --test-scheduled` and needs `BACKEND_API_URL` and `CRON_SECRET` in `cron/.dev.vars`. See [the Worker](../concepts/cast-reminder-worker.md)."}, "types": ["Convention", "Decision", "Domain Concept", "Integration", "Pitfall", "Repository", "Runbook", "Unknown"], "palette": {"BigQuery Dataset": "#8b5cf6", "BigQuery Table": "#3b82f6", "Reference": "#10b981"}};
+</script>
+<script>
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+(function () {
+  const bundle = window.BUNDLE;
+  const bundleName = window.BUNDLE_NAME;
+  document.title = `${bundleName} — OKF Viewer`;
+  document.getElementById("bundle-name").textContent = bundleName;
+
+  // Populate type filter
+  const typeSelect = document.getElementById("filter-type");
+  for (const t of bundle.types) {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    typeSelect.appendChild(opt);
+  }
+
+  // Build reverse-link index for backlinks
+  const backlinks = {};
+  for (const edge of bundle.edges) {
+    const { source, target } = edge.data;
+    (backlinks[target] ||= []).push(source);
+  }
+
+  // Look up node label/type by id
+  const nodeIndex = {};
+  for (const n of bundle.nodes) nodeIndex[n.data.id] = n.data;
+
+  const cy = cytoscape({
+    container: document.getElementById("graph"),
+    elements: [...bundle.nodes, ...bundle.edges],
+    style: [
+      {
+        selector: "node",
+        style: {
+          "background-color": "data(color)",
+          "label": "data(label)",
+          "color": "#0f172a",
+          "font-size": 11,
+          "text-valign": "bottom",
+          "text-margin-y": 4,
+          "text-wrap": "wrap",
+          "text-max-width": 120,
+          "width": "data(size)",
+          "height": "data(size)",
+          "border-width": 1,
+          "border-color": "#0f172a",
+        },
+      },
+      {
+        selector: "node[?stale]",
+        style: {
+          "border-width": 2,
+          "border-color": "#b91c1c",
+          "border-style": "dashed",
+        },
+      },
+      {
+        selector: 'node[status = "deprecated"]',
+        style: {
+          "opacity": 0.55,
+        },
+      },
+      {
+        selector: "node:selected",
+        style: {
+          "border-width": 3,
+          "border-color": "#f59e0b",
+        },
+      },
+      {
+        selector: "edge",
+        style: {
+          "width": 1.5,
+          "line-color": "#cbd5e1",
+          "target-arrow-color": "#cbd5e1",
+          "target-arrow-shape": "triangle",
+          "curve-style": "bezier",
+          "arrow-scale": 0.9,
+        },
+      },
+      {
+        selector: "edge:selected",
+        style: {
+          "line-color": "#f59e0b",
+          "target-arrow-color": "#f59e0b",
+          "width": 2.5,
+        },
+      },
+      {
+        selector: ".dim",
+        style: { "opacity": 0.15 },
+      },
+    ],
+    layout: { name: "cose", animate: false, padding: 30 },
+    wheelSensitivity: 0.2,
+  });
+
+  cy.on("tap", "node", (evt) => showDetail(evt.target.id()));
+  cy.on("tap", (evt) => {
+    if (evt.target === cy) clearSelection();
+  });
+
+  document.getElementById("layout").addEventListener("change", (e) => {
+    cy.layout({ name: e.target.value, animate: false, padding: 30 }).run();
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    cy.fit(null, 30);
+    clearSelection();
+  });
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      const d = n.data();
+      const hay =
+        (d.label || "").toLowerCase() + " " +
+        d.id.toLowerCase() + " " +
+        (d.tags || []).join(" ").toLowerCase();
+      n.toggleClass("dim", !hay.includes(q));
+    });
+    cy.edges().forEach((edge) => {
+      const src = edge.source();
+      const tgt = edge.target();
+      edge.toggleClass("dim", src.hasClass("dim") || tgt.hasClass("dim"));
+    });
+  });
+
+  document.getElementById("filter-type").addEventListener("change", (e) => {
+    const t = e.target.value;
+    if (!t) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      n.toggleClass("dim", n.data("type") !== t);
+    });
+    cy.edges().forEach((edge) => {
+      edge.toggleClass("dim", edge.source().hasClass("dim") || edge.target().hasClass("dim"));
+    });
+  });
+
+  function clearSelection() {
+    cy.elements().unselect();
+    document.getElementById("detail-empty").hidden = false;
+    document.getElementById("detail-content").hidden = true;
+  }
+
+  function showDetail(conceptId) {
+    const data = nodeIndex[conceptId];
+    if (!data) return;
+    cy.elements().unselect();
+    const node = cy.getElementById(conceptId);
+    if (node) node.select();
+
+    document.getElementById("detail-empty").hidden = true;
+    const content = document.getElementById("detail-content");
+    content.hidden = false;
+
+    const chip = document.getElementById("detail-type");
+    chip.textContent = data.type;
+    chip.style.background = data.color;
+
+    document.getElementById("detail-title").textContent = data.label;
+    document.getElementById("detail-id").textContent = conceptId;
+    document.getElementById("detail-description").textContent = data.description || "—";
+
+    const resourceEl = document.getElementById("detail-resource");
+    resourceEl.innerHTML = "";
+    if (data.resource) {
+      const a = document.createElement("a");
+      a.href = data.resource;
+      a.textContent = data.resource;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.className = "external";
+      resourceEl.appendChild(a);
+    } else {
+      resourceEl.textContent = "—";
+    }
+
+    const tagsEl = document.getElementById("detail-tags");
+    tagsEl.innerHTML = "";
+    if (data.tags && data.tags.length) {
+      for (const t of data.tags) {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = t;
+        tagsEl.appendChild(span);
+      }
+    } else {
+      tagsEl.textContent = "—";
+    }
+
+    // v0.2 signal badges: status, trust tier, staleness.
+    const badgesEl = document.getElementById("detail-badges");
+    badgesEl.innerHTML = "";
+    const status = data.status || "stable";
+    badgesEl.appendChild(makeBadge(status, "status-" + status));
+    const tier = data.trust_tier || "unverified";
+    badgesEl.appendChild(makeBadge(tier.replace(/-/g, " "), "trust-" + tier));
+    if (data.stale) {
+      const label = data.stale_after ? `stale (since ${data.stale_after})` : "stale";
+      badgesEl.appendChild(makeBadge(label, "stale"));
+    } else if (data.stale_after) {
+      badgesEl.appendChild(makeBadge(`stale after ${data.stale_after}`, "fresh"));
+    }
+
+    document.getElementById("detail-generated").textContent = formatActorEvent(data.generated);
+
+    const verifiedEl = document.getElementById("detail-verified");
+    const verified = data.verified || [];
+    if (verified.length) {
+      verifiedEl.textContent = verified.map(formatActorEvent).join("; ");
+    } else {
+      verifiedEl.textContent = "—";
+    }
+
+    const sourcesEl = document.getElementById("detail-sources");
+    sourcesEl.innerHTML = "";
+    const sources = data.sources || [];
+    if (sources.length) {
+      const ul = document.createElement("ul");
+      ul.className = "sources-list";
+      for (const s of sources) {
+        const li = document.createElement("li");
+        const label = s.title || s.resource || s.id || "source";
+        if (s.resource && /^https?:\/\//.test(s.resource)) {
+          const a = document.createElement("a");
+          a.href = s.resource;
+          a.textContent = label;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.className = "external";
+          li.appendChild(a);
+        } else {
+          li.textContent = s.resource ? `${label} (${s.resource})` : label;
+        }
+        ul.appendChild(li);
+      }
+      sourcesEl.appendChild(ul);
+    } else {
+      sourcesEl.textContent = "—";
+    }
+
+    const body = bundle.bodies[conceptId] || "";
+    const html = marked.parse(body, { breaks: false, gfm: true });
+    const bodyEl = document.getElementById("detail-body");
+    bodyEl.innerHTML = html;
+    rewriteInternalLinks(bodyEl);
+
+    const bl = backlinks[conceptId] || [];
+    const blSection = document.getElementById("detail-backlinks");
+    const blList = document.getElementById("backlinks-list");
+    blList.innerHTML = "";
+    if (bl.length) {
+      blSection.hidden = false;
+      for (const src of bl) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.textContent = nodeIndex[src]?.label || src;
+        a.dataset.target = src;
+        a.addEventListener("click", () => showDetail(src));
+        li.appendChild(a);
+        const muted = document.createElement("span");
+        muted.className = "muted";
+        muted.textContent = ` (${src})`;
+        li.appendChild(muted);
+        blList.appendChild(li);
+      }
+    } else {
+      blSection.hidden = true;
+    }
+
+    cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 1.0) }, { duration: 200 });
+  }
+
+  function makeBadge(text, cls) {
+    const span = document.createElement("span");
+    span.className = "badge " + cls;
+    span.textContent = text;
+    return span;
+  }
+
+  function formatActorEvent(event) {
+    if (!event || !event.by) return "—";
+    return event.at ? `${event.by} · ${event.at}` : String(event.by);
+  }
+
+  function rewriteInternalLinks(root) {
+    root.querySelectorAll("a[href]").forEach((a) => {
+      const href = a.getAttribute("href");
+      if (!href) return;
+      if (href.startsWith("/") && href.endsWith(".md")) {
+        const target = href.slice(1, -3);
+        if (nodeIndex[target]) {
+          a.className = "internal";
+          a.setAttribute("href", "javascript:void(0)");
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            showDetail(target);
+          });
+          return;
+        }
+      }
+      a.className = "external";
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+    });
+  }
+
+  // Auto-show the first node (a dataset if available, else first concept)
+  const initial =
+    bundle.nodes.find((n) => n.data.type === "BigQuery Dataset") ||
+    bundle.nodes[0];
+  if (initial) showDetail(initial.data.id);
+})();
+
+</script>
+</body>
+</html>
