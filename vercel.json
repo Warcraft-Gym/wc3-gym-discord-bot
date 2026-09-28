@@ -1,4 +1,11 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true,
+      "staging": true
+    }
+  },
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": { "app.py": { "maxDuration": 60 } }
 }
