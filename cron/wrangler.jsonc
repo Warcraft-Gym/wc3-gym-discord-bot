@@ -4,7 +4,7 @@
   "compatibility_date": "2026-09-09",
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
-  // CAST_REMINDER_SECRET is a Worker secret, set once per Worker in the Cloudflare dashboard
+  // CLOUDFLARE_CRON_SECRET is a Worker secret, set once per Worker in the Cloudflare dashboard
   "observability": { "enabled": true },
   "env": {
     // Deploys as wc3-gym-cast-reminders-staging. No cron: `triggers` is an

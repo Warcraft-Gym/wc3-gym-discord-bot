@@ -19,7 +19,7 @@ sources:
 
 # What it does
 
-On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminders` with `Authorization: Bearer <CAST_REMINDER_SECRET>`. A refused or failed call throws, so the failure shows in the Worker's Cron Events; a good call logs the backend's answer.
+On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminders` with `Authorization: Bearer <CLOUDFLARE_CRON_SECRET>`. A refused or failed call throws, so the failure shows in the Worker's Cron Events; a good call logs the backend's answer.
 
 # Two environments
 
@@ -32,7 +32,7 @@ On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminde
 
 # Secrets
 
-`CAST_REMINDER_SECRET` is a Worker secret, never a plain variable, set once per Worker in the Cloudflare dashboard under Settings, Variables and Secrets. It is the same value the backend checks on this route only. A deploy keeps it; a new or re-created Worker starts without it, and the backend answers 401 until it is set. `BACKEND_API_URL` is a plain variable per environment.
+`CLOUDFLARE_CRON_SECRET` is a Worker secret, never a plain variable, set once per Worker in the Cloudflare dashboard under Settings, Variables and Secrets. It is the same value the backend checks on this route only. A deploy keeps it; a new or re-created Worker starts without it, and the backend answers 401 until it is set. One value serves both Workers and both backend targets. `BACKEND_API_URL` is a plain variable per environment.
 
 # Deploy
 
