@@ -32,8 +32,8 @@ On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminde
 
 # Secrets
 
-`CRON_SECRET` is a Worker secret, never a plain variable, set by `just cron deploy` from the environment. It is the same value the backend checks. `BACKEND_API_URL` is a plain variable per environment.
+`CRON_SECRET` is a Worker secret, never a plain variable, set per Worker in the Cloudflare dashboard under Settings, Variables and Secrets. Each Worker has its own value: the production Worker's matches `CLOUDFLARE_CRON_SECRET` on the backend's Production target, the staging Worker's matches it on Preview. The backend checks it on this route only. A deploy keeps it; a new or re-created Worker starts without it, and the backend answers 401 until it is set. `BACKEND_API_URL` is a plain variable per environment.
 
 # Deploy
 
-`deploy-cron.yml` runs `just cron test` and `just cron deploy` for both environments on every merge that touches `cron/`. It needs the repository secrets for the Cloudflare token, the account id and the cron secret. By hand: `cd cron && just deploy staging`. Watch a run with `npx wrangler@3 tail` in `cron/`, with `--env staging` for staging.
+`deploy-cron.yml` runs `just cron test` and `just cron deploy` for both environments on every merge that touches `cron/`. It needs the repository secrets for the Cloudflare token and the account id. By hand: `cd cron && just deploy staging`. Watch a run with `npx wrangler@3 tail` in `cron/`, with `--env staging` for staging.

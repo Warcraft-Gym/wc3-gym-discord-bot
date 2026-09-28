@@ -4,7 +4,7 @@
   "compatibility_date": "2026-09-09",
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
-  // CRON_SECRET is a secret: `just cron deploy` sets it from the environment
+  // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard
   "observability": { "enabled": true },
   "env": {
     // Deploys as wc3-gym-cast-reminders-staging. No cron: `triggers` is an
