@@ -19,7 +19,7 @@ The backend repository, `wc3-gym-backend`, owns both routes and every command, c
 | Route | Sent by | Headers | Answer relied on |
 |---|---|---|---|
 | `POST /discord/interactions` | the adapter | `Content-Type: application/json`, `X-Signature-Ed25519`, `X-Signature-Timestamp`, the body as Discord sent it | for an autocomplete, the JSON to relay as is; for everything else, nothing, because the backend edits the deferred reply itself |
-| `GET /jobs/cast-reminders` | the Worker | `Authorization: Bearer <CRON_SECRET>` | a 2xx; the body is logged |
+| `GET /jobs/cast-reminders` | the Worker | `Authorization: Bearer <CAST_REMINDER_SECRET>` | a 2xx; the body is logged |
 
 # Environment values
 
@@ -28,6 +28,6 @@ The backend repository, `wc3-gym-backend`, owns both routes and every command, c
 | the adapter | `DISCORD_PUBLIC_KEY` | the application's public key from the Developer Portal; the backend holds the same value |
 | the adapter | `BACKEND_URL` | the interactions route in full |
 | the Worker | `BACKEND_API_URL` | the backend origin |
-| the Worker | `CRON_SECRET` | the bearer the backend's job routes check |
+| the Worker | `CAST_REMINDER_SECRET` | the bearer the backend's cast-reminder route checks |
 
-The backend answers 503 on the interactions route while its own copy of the public key is unset, and on every job route while its cron secret is unset. A 503 from the forward means a backend configuration gap, not an adapter fault.
+The backend answers 503 on the interactions route while its own copy of the public key is unset, and on the cast-reminder route while its own copy of that secret is unset. A 503 from the forward means a backend configuration gap, not an adapter fault.

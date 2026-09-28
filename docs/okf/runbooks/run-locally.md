@@ -27,4 +27,4 @@ sources:
 
 - Discord cannot reach a local port, so a real command never arrives locally. The tests are the way to exercise the handshake; a tunnel is the way to test against Discord itself.
 - The adapter reads its two values at import. A missing value fails at start with a `KeyError`, not on the first request.
-- The Worker in `cron/` runs with `cd cron && npx wrangler@3 dev --test-scheduled` and needs `BACKEND_API_URL` and `CRON_SECRET` in `cron/.dev.vars`. See [the Worker](../concepts/cast-reminder-worker.md).
+- The Worker in `cron/` runs with `cd cron && npx wrangler@3 dev --test-scheduled` and needs `BACKEND_API_URL` and `CAST_REMINDER_SECRET` in `cron/.dev.vars`. See [the Worker](../concepts/cast-reminder-worker.md).

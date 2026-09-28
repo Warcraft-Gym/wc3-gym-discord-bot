@@ -7,8 +7,6 @@ wrangler := "npx --yes wrangler@3.114.17"
 test:
     node --test
 
-# Deploy the Worker, prod or staging, and set its CRON_SECRET from the environment.
+# Deploy the Worker, prod or staging. Its secret survives a deploy; set it in the dashboard.
 deploy env="prod":
-    : "${CRON_SECRET:?CRON_SECRET is not set}"
     {{ wrangler }} deploy {{ if env == "prod" { "" } else { "--env " + env } }}
-    printf %s "$CRON_SECRET" | {{ wrangler }} secret put CRON_SECRET {{ if env == "prod" { "" } else { "--env " + env } }}

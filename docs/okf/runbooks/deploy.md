@@ -31,16 +31,16 @@ The project holds `DISCORD_PUBLIC_KEY` and `BACKEND_URL` as environment values. 
 
 # The Worker
 
-Every merge that touches `cron/` runs `deploy-cron.yml`: `just cron test`, then `just cron deploy staging`, then `just cron deploy prod`. The workflow reads three repository secrets: a Cloudflare API token with Worker edit rights, the Cloudflare account id, and the cron secret the backend checks. Run the workflow by hand from the Actions tab with `workflow_dispatch`.
+Every merge that touches `cron/` runs `deploy-cron.yml`: `just cron test`, then `just cron deploy staging`, then `just cron deploy prod`. The workflow reads two repository secrets: a Cloudflare API token with Worker edit rights and the Cloudflare account id. Run the workflow by hand from the Actions tab with `workflow_dispatch`.
 
-By hand, with the same three values in the environment:
+By hand, with the same two values in the environment:
 
 ```
 just cron deploy staging
 just cron deploy
 ```
 
-`just cron deploy` deploys, then writes `CRON_SECRET` as a Worker secret from the environment. It refuses to run when the value is unset.
+`just cron deploy` deploys the code only. `CAST_REMINDER_SECRET` is set once per Worker in the Cloudflare dashboard and survives every deploy.
 
 # Check a deploy
 
