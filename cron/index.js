@@ -3,7 +3,7 @@
 export default {
   async scheduled(_controller, env) {
     const response = await fetch(`${env.BACKEND_API_URL}/jobs/cast-reminders`, {
-      headers: { Authorization: `Bearer ${env.CLOUDFLARE_CRON_SECRET}` },
+      headers: { Authorization: `Bearer ${env.CRON_SECRET}` },
     });
     const body = await response.text();
     if (!response.ok) {

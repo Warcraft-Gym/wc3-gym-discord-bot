@@ -40,7 +40,7 @@ just cron deploy staging
 just cron deploy
 ```
 
-`just cron deploy` deploys the code only. `CLOUDFLARE_CRON_SECRET` is set once per Worker in the Cloudflare dashboard and survives every deploy.
+`just cron deploy` deploys the code only. `CRON_SECRET` is set per Worker in the Cloudflare dashboard and survives every deploy.
 
 # Check a deploy
 

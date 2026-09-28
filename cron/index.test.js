@@ -3,7 +3,7 @@ import test from "node:test";
 
 import worker from "./index.js";
 
-const env = { BACKEND_API_URL: "https://backend.example", CLOUDFLARE_CRON_SECRET: "s3cret" };
+const env = { BACKEND_API_URL: "https://backend.example", CRON_SECRET: "s3cret" };
 
 function stubFetch(status, body) {
   const calls = [];
