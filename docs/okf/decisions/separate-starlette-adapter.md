@@ -1,9 +1,9 @@
 ---
 type: Decision
 title: A separate one-file Starlette app
-description: The interactions endpoint is its own repository and Vercel project, one Starlette route on the standard library, because the backend cold-starts past Discord's window.
+description: The interactions endpoint is its own repository and Vercel project, one small Starlette app on the standard library, because the backend cold-starts past Discord's window.
 tags: [discord, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
 sources:
   - id: source
     resource: Measured cold starts, 2026-09-05 and 2026-09-06
@@ -15,7 +15,7 @@ sources:
 
 # Decision
 
-Discord posts to this repository, not to the backend. The adapter is one Starlette route that verifies, acknowledges and forwards. It is its own Vercel project, deployed from its own repository.
+Discord posts to this repository, not to the backend. The adapter is one Starlette app with two routes: `POST /interactions` verifies, acknowledges and forwards, and `GET /health` answers a check. It is its own Vercel project, deployed from its own repository.
 
 # Why
 
