@@ -4,7 +4,7 @@ title: Deploy the adapter and the Worker
 description: The adapter deploys to Vercel with just deploy; the Worker deploys to Cloudflare from a GitHub workflow on merge, or by hand with just cron deploy.
 resource: ../../../justfile
 tags: [deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
+generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T12:53:50Z }
 stale_after: 2027-04-06T00:00:00Z
 sources:
   - id: justfile
@@ -20,7 +20,7 @@ sources:
 
 # The adapter
 
-The Vercel project is linked to this repository. A push to `main` deploys production and a push to `staging` deploys a preview. No other branch deploys from Git, so a pull request gets no preview of its own. By hand, from the linked checkout:
+The Vercel project is linked to this repository. A push to `main` deploys production. No other push builds anything: the project makes no preview from Git, so neither `staging` nor a pull request branch deploys. By hand, from the linked checkout:
 
 ```
 just deploy staging   # a preview from the working tree
