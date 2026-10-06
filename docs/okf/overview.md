@@ -1,10 +1,10 @@
 ---
 type: Repository
 title: wc3-gym-discord-bot
-description: The Discord interactions adapter of the Warcraft Gym league app, one Starlette route on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.
+description: The Discord interactions adapter of the Warcraft Gym league app, one small Starlette app on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.
 resource: https://github.com/Warcraft-Gym/wc3-gym-discord-bot
 tags: [discord, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
 sources:
   - id: readme
     resource: ../../README.md
@@ -18,14 +18,14 @@ sources:
 
 Discord posts every slash command, button press and autocomplete of the Gym Newbie League (GNL) app to this adapter. The adapter checks Discord's signature, answers inside Discord's 3 second window, and forwards the signed payload unchanged to the backend, which checks the same signature again and does the work. The adapter knows no command and holds no bot token.
 
-Beside it, `cron/` is a Cloudflare Worker that calls the backend's cast-reminder job every five minutes, because the backend's hosting plan runs one cron a day.
+Beside it, `cron/` is a Cloudflare Worker that calls the backend's cast-reminder job every five minutes. [The decision](decisions/cron-outside-vercel.md) says why the schedule is not a Vercel cron.
 
 # Where it runs
 
 | Target | What |
 |---|---|
 | production | a Vercel project built from `main`; the Discord application's Interactions Endpoint URL points at it |
-| preview | every pull request; Discord is not pointed at previews |
+| preview | a push to `staging`, or `just deploy staging` by hand; a pull request branch does not deploy; Discord is not pointed at previews |
 | local | `uv run just dev` on port 5004 |
 | the Worker | Cloudflare, one Worker for production with a schedule and one for staging without |
 

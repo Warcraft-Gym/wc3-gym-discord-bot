@@ -1,10 +1,10 @@
 ---
 type: Domain Concept
 title: The cast-reminder Worker
-description: A Cloudflare Worker calls the backend's reminder job every five minutes, because the backend's hosting plan runs one cron a day.
+description: A Cloudflare Worker, not a Vercel cron, calls the backend's reminder job every five minutes.
 resource: ../../../cron/index.js
 tags: [worker, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
 sources:
   - id: worker
     resource: ../../../cron/index.js
@@ -26,7 +26,7 @@ On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminde
 | Environment | Name | Schedule | Backend |
 |---|---|---|---|
 | production | `wc3-gym-cast-reminders` | every five minutes | the production backend |
-| staging | `wc3-gym-cast-reminders-staging` | none; run on demand with `wrangler dev --test-scheduled` | the staging backend alias |
+| staging | `wc3-gym-cast-reminders-staging` | none; run on demand with `wrangler dev --test-scheduled --env staging` | the staging backend alias |
 
 `triggers` is an inheritable key in the Wrangler configuration, so the staging environment sets an empty cron list on purpose; without it the production schedule would apply there too.
 
@@ -36,4 +36,4 @@ On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminde
 
 # Deploy
 
-`deploy-cron.yml` runs `just cron test` and `just cron deploy` for both environments on every merge that touches `cron/`. It needs the repository secrets for the Cloudflare token and the account id. By hand: `cd cron && just deploy staging`. Watch a run with `npx wrangler@3 tail` in `cron/`, with `--env staging` for staging.
+`deploy-cron.yml` runs `just cron test` and `just cron deploy` for both environments on every merge that touches `cron/`. It needs the repository secrets for the Cloudflare token and the account id. By hand: `cd cron && just deploy staging`. Watch a run with `npx wrangler@3.114.17 tail` in `cron/`, with `--env staging` for staging.
