@@ -3,6 +3,7 @@
 ## 2026-10-06
 
 * **Update**: every concept was read against the code. Git deploys only `main` and `staging`, so a pull request gets no preview; the staging Worker configuration runs on demand with `--env staging`; the adapter app has two routes; the bundle test also refuses sensitive content. [Overview](overview.md), [deploy](runbooks/deploy.md), [run locally](runbooks/run-locally.md), [the Worker](concepts/cast-reminder-worker.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [the adapter decision](decisions/separate-starlette-adapter.md), [bundle rules](conventions/okf-bundle.md).
+* **Update**: Vercel builds only `main`; no push builds a preview. [Overview](overview.md), [deploy](runbooks/deploy.md).
 
 ## 2026-09-14
 
