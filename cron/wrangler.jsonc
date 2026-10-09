@@ -12,7 +12,7 @@
     // applying here. Run it on demand with `wrangler dev --test-scheduled --env staging`.
     "staging": {
       "triggers": { "crons": [] },
-      "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-git-main-wc-3-gym.vercel.app" }
+      "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-staging.vercel.app" }
     }
   }
 }
