@@ -4,7 +4,7 @@ title: The cast-reminder Worker
 description: A Cloudflare Worker, not a Vercel cron, calls the backend's reminder job every five minutes.
 resource: ../../../cron/index.js
 tags: [worker, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-15T12:25:06Z }
 sources:
   - id: worker
     resource: ../../../cron/index.js
@@ -26,9 +26,9 @@ On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminde
 | Environment | Name | Schedule | Backend |
 |---|---|---|---|
 | production | `wc3-gym-cast-reminders` | every five minutes | the production backend |
-| staging | `wc3-gym-cast-reminders-staging` | none; run on demand with `wrangler dev --test-scheduled --env staging` | the staging backend alias |
+| staging | `wc3-gym-cast-reminders-staging` | every five minutes | the staging backend alias |
 
-`triggers` is an inheritable key in the Wrangler configuration, so the staging environment sets an empty cron list on purpose; without it the production schedule would apply there too.
+`triggers` is an inheritable key in the Wrangler configuration, so each environment states its own cron list, even where it matches production's. Each Worker calls its own backend, and that backend posts in the channels its own settings name, so a staging run posts real Discord messages.
 
 # Secrets
 
