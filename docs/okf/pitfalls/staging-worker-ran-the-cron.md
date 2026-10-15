@@ -1,19 +1,19 @@
 ---
 type: Pitfall
 title: The staging Worker inherited the production schedule
-description: Wrangler environments inherit triggers, so the staging Worker ran the five-minute reminder cron; the staging environment now sets an empty cron list on purpose.
+description: Wrangler environments inherit triggers, so the staging Worker once ran the production cron without stating one; every environment now states its own cron list.
 tags: [worker, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T10:17:45Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-15T12:25:06Z }
 sources:
   - id: config
     resource: ../../../cron/wrangler.jsonc
-    title: The empty cron list
+    title: The cron list of each environment
 ---
 
 # What happened
 
-The staging Worker was added as a Wrangler environment with only its own backend URL. `triggers` is an inheritable key, so the staging Worker ran the production five-minute schedule against the staging backend: 288 calls a day. A schedule there would post duplicate reminders.
+The staging Worker was added as a Wrangler environment with only its own backend URL. `triggers` is an inheritable key, so the staging Worker ran the production five-minute schedule against the staging backend, although its own environment stated no schedule.
 
 # The rule
 
-The staging environment in `cron/wrangler.jsonc` sets `"triggers": { "crons": [] }`. Keep that line through every change to the file. Run the staging configuration on demand with `wrangler dev --test-scheduled --env staging`; without `--env staging` the command uses the top-level configuration, which names the production backend. Any new Wrangler environment must state its own `triggers`, even an empty one.
+Every environment in `cron/wrangler.jsonc` states its own `triggers`, even when its cron list matches production's or is empty. The staging environment states `"triggers": { "crons": ["*/5 * * * *"] }`, the production schedule written out. Before you change the schedule of an environment, check which channels its backend's settings name, because each scheduled run can post in Discord.

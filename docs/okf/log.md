@@ -1,5 +1,9 @@
 # Bundle history
 
+## 2026-10-15
+
+* **Update**: the staging Worker runs the same five-minute schedule as production, and every Wrangler environment states its own cron list. [The Worker](concepts/cast-reminder-worker.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [the cron decision](decisions/cron-outside-vercel.md), [the Wrangler pitfall](pitfalls/wrangler-version.md), [overview](overview.md).
+
 ## 2026-10-06
 
 * **Update**: every concept was read against the code. Git deploys only `main` and `staging`, so a pull request gets no preview; the staging Worker configuration runs on demand with `--env staging`; the adapter app has two routes; the bundle test also refuses sensitive content. [Overview](overview.md), [deploy](runbooks/deploy.md), [run locally](runbooks/run-locally.md), [the Worker](concepts/cast-reminder-worker.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [the adapter decision](decisions/separate-starlette-adapter.md), [bundle rules](conventions/okf-bundle.md).

@@ -4,7 +4,7 @@ title: wc3-gym-discord-bot
 description: The Discord interactions adapter of the Warcraft Gym league app, one small Starlette app on Vercel, plus the Cloudflare Worker that calls the backend's reminder job every five minutes.
 resource: https://github.com/Warcraft-Gym/wc3-gym-discord-bot
 tags: [discord, deploy]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-10-06T12:53:50Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-15T12:25:06Z }
 sources:
   - id: readme
     resource: ../../README.md
@@ -27,7 +27,7 @@ Beside it, `cron/` is a Cloudflare Worker that calls the backend's cast-reminder
 | production | a Vercel project built from `main`; the Discord application's Interactions Endpoint URL points at it |
 | preview | `just deploy staging` by hand; no push builds one; Discord is not pointed at previews |
 | local | `uv run just dev` on port 5004 |
-| the Worker | Cloudflare, one Worker for production with a schedule and one for staging without |
+| the Worker | Cloudflare, one Worker for production and one for staging, both every five minutes |
 
 # Layout
 
