@@ -5,6 +5,11 @@
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
   // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard
+  // The optional STATE KV binding lets the Worker skip ticks before the next_run the backend
+  // answers. Without it every tick calls. To add it, per env:
+  //   npx wrangler@3.114.17 kv namespace create STATE [--env staging]
+  // then add "kv_namespaces": [{ "binding": "STATE", "id": "<the id it prints>" }] here, and
+  // under "staging" with that env's own namespace (kv_namespaces is not inherited).
   "observability": { "enabled": true },
   "env": {
     // Deploys as wc3-gym-cast-reminders-staging, on the same five-minute schedule as prod.
