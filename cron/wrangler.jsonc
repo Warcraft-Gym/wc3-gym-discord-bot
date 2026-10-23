@@ -2,22 +2,27 @@
   "name": "wc3-gym-cast-reminders",
   "main": "index.js",
   "compatibility_date": "2026-09-09",
-  "triggers": { "crons": ["*/5 * * * *"] },
+  // Ticks every minute; a tick calls the backend only once the stored next_run has come.
+  "triggers": { "crons": ["* * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
-  // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard
-  // The optional STATE KV binding lets the Worker skip ticks before the next_run the backend
-  // answers. Without it every tick calls. To add it, per env:
+  // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard. The backend sends
+  // the same value as the bearer of its POST /next-run push, which arrives on the Worker's own
+  // URL, so the workers.dev route stays on (the default).
+  // The STATE KV binding keeps the next_run the backend answers or pushes. Without it, while
+  // nothing is stored, or once the stored time is more than ten minutes past, the Worker calls on
+  // every fifth minute; without it pushes are dropped. Each env binds its own namespace
+  // (kv_namespaces is not inherited); a new one comes from
   //   npx wrangler@3.114.17 kv namespace create STATE [--env staging]
-  // then add "kv_namespaces": [{ "binding": "STATE", "id": "<the id it prints>" }] here, and
-  // under "staging" with that env's own namespace (kv_namespaces is not inherited).
+  "kv_namespaces": [{ "binding": "STATE", "id": "85595e54b1444afb96da9be69334d511" }],
   "observability": { "enabled": true },
   "env": {
-    // Deploys as wc3-gym-cast-reminders-staging, on the same five-minute schedule as prod.
+    // Deploys as wc3-gym-cast-reminders-staging, on the same minute tick as prod.
     // `triggers` is inheritable, so every env states its own cron list, even one that matches prod.
-    // Each run can post in Discord, in the channels the staging backend's settings name.
+    // Each backend call can post in Discord, in the channels the staging backend's settings name.
     "staging": {
-      "triggers": { "crons": ["*/5 * * * *"] },
-      "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-staging.vercel.app" }
+      "triggers": { "crons": ["* * * * *"] },
+      "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-staging.vercel.app" },
+      "kv_namespaces": [{ "binding": "STATE", "id": "3b5859096aab4e5baa0905faedecbdf9" }]
     }
   }
 }
