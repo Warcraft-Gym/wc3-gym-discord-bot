@@ -105,6 +105,44 @@ test("an answer without a next run clears the stored one, then every fifth minut
   assert.equal(calls.length, 2);
 });
 
+test("a stored time more than ten minutes past falls back to every fifth minute", async () => {
+  const calls = stubFetch(500, "down");
+  const STATE = memoryKv({ next_run: "2026-10-23T10:00:00.000Z" });
+
+  // still due: a failed call is retried on the next minute
+  await assert.rejects(worker.scheduled(at("2026-10-23T10:04:00Z"), { ...env, STATE }));
+  assert.equal(calls.length, 1);
+
+  await worker.scheduled(at("2026-10-23T10:11:00Z"), { ...env, STATE });
+  assert.equal(calls.length, 1);
+
+  await assert.rejects(worker.scheduled(at("2026-10-23T10:15:00Z"), { ...env, STATE }));
+  assert.equal(calls.length, 2);
+});
+
+test("a time already stored is not written again", async () => {
+  const STATE = memoryKv({ next_run: "2026-10-23T10:30:00.000Z" });
+  let puts = 0;
+  const put = STATE.put;
+  STATE.put = async (key, value) => {
+    puts += 1;
+    return put(key, value);
+  };
+
+  const same = await worker.fetch(push('{"next_run": "2026-10-23T10:30:00+00:00"}'), { ...env, STATE });
+  assert.equal(same.status, 204);
+  assert.equal(puts, 0);
+
+  stubFetch(200, '{"posted": 0, "next_run": "2026-10-23T10:30:00+00:00"}');
+  await worker.scheduled(at("2026-10-23T10:30:00Z"), { ...env, STATE });
+  assert.equal(puts, 0);
+
+  const moved = await worker.fetch(push('{"next_run": "2026-10-23T10:45:00+00:00"}'), { ...env, STATE });
+  assert.equal(moved.status, 204);
+  assert.equal(puts, 1);
+  assert.equal(STATE.store.get("next_run"), "2026-10-23T10:45:00.000Z");
+});
+
 test("with STATE bound and nothing stored, calls only on every fifth minute", async () => {
   const calls = stubFetch(200, '{"posted": 0}');
   const STATE = memoryKv();
