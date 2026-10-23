@@ -27,7 +27,7 @@ just deploy staging
 
 ## Cast reminders
 
-`cron/` is a Cloudflare Worker that calls the backend's `GET /jobs/cast-reminders` every five minutes, one Worker for prod and one for staging, each against its own backend. Both run on the same schedule, and each run can post in Discord, in the channels its backend's settings name. The workflow `deploy-cron.yml` runs `just cron test` and `just cron deploy` for both on every merge that touches `cron/`. It needs the repository secrets `CLOUDFLARE_WORKER_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Each Worker holds its own `CRON_SECRET`, set in the Cloudflare dashboard; the backend checks it as `CLOUDFLARE_CRON_SECRET`.
+`cron/` is a Cloudflare Worker, one for prod and one for staging, each against its own backend. The prod Worker runs every minute. On every fifth minute it calls the backend's `GET /jobs/cast-reminders`; on the other minutes it probes `GET /health`, so the backend's function instance stays warm. A cold start costs about 3.7 s of CPU, and a warm probe far less. The staging Worker has no schedule. To test the reminder flow, add the cron `*/5 * * * *` to it in the Cloudflare dashboard under Settings, Trigger Events, and delete it when the test ends; the next deploy also removes it. Each run of the job can post in Discord, in the channels its backend's settings name. The workflow `deploy-cron.yml` runs `just cron test` and `just cron deploy` for both on every merge that touches `cron/`. It needs the repository secrets `CLOUDFLARE_WORKER_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Each Worker holds its own `CRON_SECRET`, set in the Cloudflare dashboard; the backend checks it as `CLOUDFLARE_CRON_SECRET`.
 
 ```
 cd cron && npx wrangler@3.114.17 tail                  # watch prod runs

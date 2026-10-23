@@ -1,5 +1,9 @@
 # Bundle history
 
+## 2026-10-23
+
+* **Update**: the production Worker runs every minute, calls the reminder job on every fifth minute and probes the backend's health route on the others, so the backend stays warm; the staging Worker runs no schedule. [The Worker](concepts/cast-reminder-worker.md), [the backend contract](concepts/backend-contract.md), [the cron decision](decisions/cron-outside-vercel.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [run locally](runbooks/run-locally.md), [overview](overview.md).
+
 ## 2026-10-15
 
 * **Update**: the staging Worker runs the same five-minute schedule as production, and every Wrangler environment states its own cron list. [The Worker](concepts/cast-reminder-worker.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [the cron decision](decisions/cron-outside-vercel.md), [the Wrangler pitfall](pitfalls/wrangler-version.md), [overview](overview.md).

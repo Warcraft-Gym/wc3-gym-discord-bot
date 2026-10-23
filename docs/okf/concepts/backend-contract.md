@@ -1,10 +1,10 @@
 ---
 type: Integration
 title: The backend contract, as consumed here
-description: The two backend routes this repository calls, the headers they need, and the environment values on each side.
+description: The three backend routes this repository calls, the headers they need, and the environment values on each side.
 resource: ../../../app.py
 tags: [backend]
-generated: { by: claude-code/claude-fable-5-1, at: 2026-09-14T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-23T03:12:19Z }
 sources:
   - id: app
     resource: ../../../app.py
@@ -14,12 +14,13 @@ sources:
     title: The job call
 ---
 
-The backend repository, `wc3-gym-backend`, owns both routes and every command, card and reply. This file says only what this repository sends.
+The backend repository, `wc3-gym-backend`, owns all three routes and every command, card and reply. This file says only what this repository sends.
 
 | Route | Sent by | Headers | Answer relied on |
 |---|---|---|---|
 | `POST /discord/interactions` | the adapter | `Content-Type: application/json`, `X-Signature-Ed25519`, `X-Signature-Timestamp`, the body as Discord sent it | for an autocomplete, the JSON to relay as is; for everything else, nothing, because the backend edits the deferred reply itself |
-| `GET /jobs/cast-reminders` | the Worker | `Authorization: Bearer <CRON_SECRET>` | a 2xx; the body is logged |
+| `GET /jobs/cast-reminders` | the Worker, on every fifth minute | `Authorization: Bearer <CRON_SECRET>` | a 2xx; the body is logged |
+| `GET /health` | the Worker, on the other minutes | none | a 2xx from the function itself, never from a cache; the body is ignored |
 
 # Environment values
 
