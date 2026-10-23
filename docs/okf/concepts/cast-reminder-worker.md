@@ -1,10 +1,10 @@
 ---
 type: Domain Concept
 title: The cast-reminder Worker
-description: A Cloudflare Worker, not a Vercel cron, calls the backend's reminder job every five minutes.
+description: A Cloudflare Worker, not a Vercel cron, ticks every five minutes and calls the backend's reminder job unless the last answer says nothing is due yet.
 resource: ../../../cron/index.js
 tags: [worker, deploy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-15T12:25:06Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-23T12:00:00Z }
 sources:
   - id: worker
     resource: ../../../cron/index.js
@@ -20,6 +20,12 @@ sources:
 # What it does
 
 On every scheduled run the Worker sends `GET <BACKEND_API_URL>/jobs/cast-reminders` with `Authorization: Bearer <CRON_SECRET>`. A refused or failed call throws, so the failure shows in the Worker's Cron Events; a good call logs the backend's answer.
+
+# Skipping idle ticks
+
+The backend answers `next_run`, the soonest time a reminder card or a cup call can fall due, at most its sleep limit away. With a KV namespace bound as `STATE`, the Worker stores that time under the key `next_run` and returns without a call on every tick before it. A tick at or after it calls again and stores the new answer. A stored time more than two hours ahead is ignored, and an answer without `next_run` keeps the stored one. Without the `STATE` binding every tick calls.
+
+Each environment binds its own namespace: `kv_namespaces` is not inherited. Create one with `npx wrangler@3.114.17 kv namespace create STATE` in `cron/`, with `--env staging` for staging, and add the binding to `wrangler.jsonc` with the id it prints.
 
 # Two environments
 

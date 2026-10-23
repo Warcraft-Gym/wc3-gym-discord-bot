@@ -32,3 +32,52 @@ test("a refused call throws, so Cron Events shows it", async () => {
     /cast-reminders answered 401: {"error": "Unauthorized"}/,
   );
 });
+
+function memoryKv(initial = {}) {
+  const store = new Map(Object.entries(initial));
+  return {
+    store,
+    get: async (key) => store.get(key) ?? null,
+    put: async (key, value) => void store.set(key, value),
+  };
+}
+
+const at = (iso) => ({ scheduledTime: Date.parse(iso) });
+
+test("keeps the next run the backend answers", async () => {
+  stubFetch(200, '{"posted": 0, "cup_reminders": 0, "next_run": "2026-10-23T10:30:00+00:00"}');
+  const STATE = memoryKv();
+
+  await worker.scheduled(at("2026-10-23T10:00:00Z"), { ...env, STATE });
+
+  assert.equal(STATE.store.get("next_run"), "2026-10-23T10:30:00+00:00");
+});
+
+test("skips a tick before the next run, and calls at it", async () => {
+  const calls = stubFetch(200, '{"posted": 0}');
+  const STATE = memoryKv({ next_run: "2026-10-23T10:30:00+00:00" });
+
+  await worker.scheduled(at("2026-10-23T10:25:00Z"), { ...env, STATE });
+  assert.equal(calls.length, 0);
+
+  await worker.scheduled(at("2026-10-23T10:30:00Z"), { ...env, STATE });
+  assert.equal(calls.length, 1);
+});
+
+test("a next run too far ahead is not trusted", async () => {
+  const calls = stubFetch(200, '{"posted": 0}');
+  const STATE = memoryKv({ next_run: "2026-10-24T10:00:00+00:00" });
+
+  await worker.scheduled(at("2026-10-23T10:00:00Z"), { ...env, STATE });
+
+  assert.equal(calls.length, 1);
+});
+
+test("an answer without a next run keeps the last one", async () => {
+  stubFetch(200, '{"posted": 1, "cup_reminders": 0}');
+  const STATE = memoryKv({ next_run: "2026-10-23T09:00:00+00:00" });
+
+  await worker.scheduled(at("2026-10-23T10:00:00Z"), { ...env, STATE });
+
+  assert.equal(STATE.store.get("next_run"), "2026-10-23T09:00:00+00:00");
+});
