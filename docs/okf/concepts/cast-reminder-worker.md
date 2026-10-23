@@ -35,7 +35,7 @@ The tick, every minute, follows these rules:
 - A stored time that has come: call, then store the answer.
 - Every time written is clamped to at most 24 hours ahead, so the Worker calls at least once a day. An answer without `next_run` clears the stored time.
 
-KV writes are the scarce quota, reads are not. A time equal to the one already stored is not written again, so the writes in a day are the real changes of the next run.
+A time equal to the one already stored is not written again, so the writes in a day are the real changes of the next run.
 
 The backend's answer carries two counts that show when the two sides fell out of step: `late`, cards posted more than two minutes after they were owed, and `missed`, claimed series that started without a card. Both should read 0. The Worker logs every answer.
 
