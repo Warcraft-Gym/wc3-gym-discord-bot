@@ -1,5 +1,9 @@
 # Bundle history
 
+## 2026-10-23
+
+* **Update**: the Worker ticks every minute, calls the backend once the stored next run has come and at least once a day, and accepts the backend's push on `POST /next-run`. [The Worker](concepts/cast-reminder-worker.md), [the backend contract](concepts/backend-contract.md), [the cron decision](decisions/cron-outside-vercel.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [run locally](runbooks/run-locally.md), [overview](overview.md).
+
 ## 2026-10-15
 
 * **Update**: the staging Worker runs the same five-minute schedule as production, and every Wrangler environment states its own cron list. [The Worker](concepts/cast-reminder-worker.md), [the staging pitfall](pitfalls/staging-worker-ran-the-cron.md), [the cron decision](decisions/cron-outside-vercel.md), [the Wrangler pitfall](pitfalls/wrangler-version.md), [overview](overview.md).
