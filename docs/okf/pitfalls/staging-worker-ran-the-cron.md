@@ -3,7 +3,7 @@ type: Pitfall
 title: The staging Worker inherited the production schedule
 description: Wrangler environments inherit triggers, so the staging Worker once ran the production cron without stating one; every environment now states its own cron list.
 tags: [worker, deploy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-15T12:25:06Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-23T03:12:19Z }
 sources:
   - id: config
     resource: ../../../cron/wrangler.jsonc
@@ -16,4 +16,4 @@ The staging Worker was added as a Wrangler environment with only its own backend
 
 # The rule
 
-Every environment in `cron/wrangler.jsonc` states its own `triggers`, even when its cron list matches production's or is empty. The staging environment states `"triggers": { "crons": ["*/5 * * * *"] }`, the production schedule written out. Before you change the schedule of an environment, check which channels its backend's settings name, because each scheduled run can post in Discord.
+Every environment in `cron/wrangler.jsonc` states its own `triggers`, even when its cron list matches production's or is empty. The staging environment states `"triggers": { "crons": [] }`, so it runs no schedule. Before you change the schedule of an environment, check which channels its backend's settings name, because each scheduled run can post in Discord.

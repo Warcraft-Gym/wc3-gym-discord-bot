@@ -2,16 +2,19 @@
   "name": "wc3-gym-cast-reminders",
   "main": "index.js",
   "compatibility_date": "2026-09-09",
-  "triggers": { "crons": ["*/5 * * * *"] },
+  // Every minute keeps the backend warm: a cold start costs about 3.7 s of CPU, a warm probe about 0.01 to 0.06 s.
+  // index.js runs the reminder job on every fifth minute and probes /health on the others.
+  "triggers": { "crons": ["* * * * *"] },
   "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-snowy.vercel.app" },
   // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard
   "observability": { "enabled": true },
   "env": {
-    // Deploys as wc3-gym-cast-reminders-staging, on the same five-minute schedule as prod.
-    // `triggers` is inheritable, so every env states its own cron list, even one that matches prod.
+    // Deploys as wc3-gym-cast-reminders-staging, with no schedule.
+    // `triggers` is inheritable, so every env states its own cron list, even an empty one.
+    // To test, add `*/5 * * * *` under Worker > Settings > Trigger Events; the next deploy removes it.
     // Each run can post in Discord, in the channels the staging backend's settings name.
     "staging": {
-      "triggers": { "crons": ["*/5 * * * *"] },
+      "triggers": { "crons": [] },
       "vars": { "BACKEND_API_URL": "https://wc3-gym-backend-staging.vercel.app" }
     }
   }
