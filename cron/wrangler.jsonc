@@ -8,9 +8,9 @@
   // CRON_SECRET is a Worker secret, set per Worker in the Cloudflare dashboard. The backend sends
   // the same value as the bearer of its POST /next-run push, which arrives on the Worker's own
   // URL, so the workers.dev route stays on (the default).
-  // The optional STATE KV binding keeps the next_run the backend answers or pushes. Without it, or
-  // while nothing is stored, the Worker calls on every fifth minute; without it pushes are dropped.
-  // To add it, per env:
+  // The optional STATE KV binding keeps the next_run the backend answers or pushes. Without it,
+  // while nothing is stored, or once the stored time is more than ten minutes past, the Worker calls
+  // on every fifth minute; without it pushes are dropped. To add it, per env:
   //   npx wrangler@3.114.17 kv namespace create STATE [--env staging]
   // then add "kv_namespaces": [{ "binding": "STATE", "id": "<the id it prints>" }] here, and
   // under "staging" with that env's own namespace (kv_namespaces is not inherited).
